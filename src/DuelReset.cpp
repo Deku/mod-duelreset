@@ -30,22 +30,6 @@ class DuelResetScript : public PlayerScript
         // Called when a duel starts (after 3s countdown)
         void OnDuelStart(Player* player1, Player* player2) override
         {
-            // Cooldowns reset
-            if (sConfigMgr->GetBoolDefault("DuelResetCooldowns", true))
-            {
-                // Temporary basic cooldown reset
-                player1->RemoveArenaSpellCooldowns();
-                player2->RemoveArenaSpellCooldowns();
-
-                /* TODO: convert this
-                player1->GetSpellHistory()->SaveCooldownStateBeforeDuel();
-                player2->GetSpellHistory()->SaveCooldownStateBeforeDuel();
-
-                ResetSpellCooldowns(player1, true);
-                ResetSpellCooldowns(player2, true);
-                //*/
-            }
-
             // Health and mana reset
             if (sConfigMgr->GetBoolDefault("DuelResetHealthMana", true))
             {
@@ -77,16 +61,12 @@ class DuelResetScript : public PlayerScript
             // do not reset anything if DUEL_INTERRUPTED or DUEL_FLED
             if (type == DUEL_WON)
             {
-                // Cooldown restore
+                // Cooldowns reset
                 if (sConfigMgr->GetBoolDefault("DuelResetCooldowns", true))
                 {
-                    /* TODO: convert this
-                    ResetSpellCooldowns(winner, false);
-                    ResetSpellCooldowns(loser, false);
-
-                    winner->GetSpellHistory()->RestoreCooldownStateAfterDuel();
-                    loser->GetSpellHistory()->RestoreCooldownStateAfterDuel();
-                    //*/
+                    // Temporary basic cooldown reset
+                    player1->RemoveArenaSpellCooldowns();
+                    player2->RemoveArenaSpellCooldowns();
                 }
 
                 // Health and mana restore
@@ -105,45 +85,6 @@ class DuelResetScript : public PlayerScript
                 }
             }
         }
-
-        /* TODO: convert this
-        static void ResetSpellCooldowns(Player* player, bool onStartDuel)
-        {
-
-            if (onStartDuel)
-            {
-                // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
-                player->GetSpellHistory()->ResetCooldowns([](SpellHistory::CooldownStorageType::iterator itr) -> bool
-                {
-                    SpellHistory::Clock::time_point now = SpellHistory::Clock::now();
-                    uint32 cooldownDuration = itr->second.CooldownEnd > now ? std::chrono::duration_cast<std::chrono::milliseconds>(itr->second.CooldownEnd - now).count() : 0;
-                    SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
-                    return spellInfo->RecoveryTime < 10 * MINUTE * IN_MILLISECONDS
-                           && spellInfo->CategoryRecoveryTime < 10 * MINUTE * IN_MILLISECONDS
-                           && !itr->second.OnHold
-                           && cooldownDuration > 0
-                           && ( spellInfo->RecoveryTime - cooldownDuration ) > (MINUTE / 2) * IN_MILLISECONDS
-                           && ( spellInfo->CategoryRecoveryTime - cooldownDuration ) > (MINUTE / 2) * IN_MILLISECONDS;
-                }, true);
-            }
-            else
-            {
-                // remove cooldowns on spells that have < 10 min CD and has no onHold
-                player->GetSpellHistory()->ResetCooldowns([](SpellHistory::CooldownStorageType::iterator itr) -> bool
-                {
-                    SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
-                    return spellInfo->RecoveryTime < 10 * MINUTE * IN_MILLISECONDS
-                           && spellInfo->CategoryRecoveryTime < 10 * MINUTE * IN_MILLISECONDS
-                           && !itr->second.OnHold;
-                }, true);
-            }
-
-            // pet cooldowns
-            if (Pet* pet = player->GetPet())
-                pet->GetSpellHistory()->ResetAllCooldowns();
-            //
-        }
-        */
 };
 
 class DuelResetWorld : public WorldScript
