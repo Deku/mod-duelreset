@@ -65,8 +65,8 @@ class DuelResetScript : public PlayerScript
                 if (sConfigMgr->GetBoolDefault("DuelResetCooldowns", true))
                 {
                     // Temporary basic cooldown reset
-                    player1->RemoveArenaSpellCooldowns();
-                    player2->RemoveArenaSpellCooldowns();
+                    winner->RemoveArenaSpellCooldowns();
+                    loser->RemoveArenaSpellCooldowns();
                 }
 
                 // Health and mana restore
